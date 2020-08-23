@@ -1,5 +1,5 @@
-from flask import Flask, render_template, url_for
-from form import RegistrationForm, LoginForm
+from flask import Flask, render_template, url_for, flash, redirect
+from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 
@@ -23,7 +23,7 @@ books = [
 
 @app.route("/")
 @app.route("/home")
-def hello():
+def home():
     return render_template("home.html", books=books)
 
 
@@ -32,16 +32,28 @@ def about():
     return render_template("about.html", title="About")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm()
-    return render_template("register.html", title="Register")
+    if form.validate_on_submit():
+        flash(f"Account created for {form.username.data} !", category="success")
+        return redirect(url_for("home"))
+    return render_template("register.html", title="Register", form=form)
 
 
-@app.route("/login")
-def register():
-    form = RegistrationForm()
-    return render_template("login.html", title="Register")
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        if (
+            form.email.data == "rithikronald@gmail.com"
+            and form.password.data == "password"
+        ):
+            flash("You have been successfully logged in !!!", "success")
+            return redirect(url_for("home"))
+        else:
+            flash("Your Username or Password is incorrect", "danger")
+    return render_template("login.html", title="Register", form=form)
 
 
 if __name__ == "__main__":
